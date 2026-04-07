@@ -7,41 +7,38 @@ output: html_fragment
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE)
-
 ```
 
 
-```{css}
-h1 {
-    color: red; font-family: Arial; font-weight: bold; font-size: 100px; padding: 40px; background-color: white; text-align: center; display: inline-block;     margin: 50px auto 0;
-}
+
+```{css} 
+
 h2 {
-    color: white; font-family: Arial; font-size: 40px; font-weight: bold; padding: 30px 0; background-color: #FF3399; text-align: center; width: 100%;          margin-top: 150px; display: block; border-radius: 12px;
+    color: white; font-size: 40px; padding: 30px 0; background-color: #FF3399; width: 100%; margin-top: 150px; border-radius: 12px;
 }
 h3 {
-    background-color: #FF1A66; color: white; font-weight: bold; text-align: center; padding: 20px; border-radius: 10px; margin: 20px auto; width: 50%;
+    background-color: #FF1A66; color: white; padding: 20px; border-radius: 10px; margin: 10px auto; width: 50%;
 }
 body {
     margin: 0px; background-color: #FFD6E0; font-family: Arial, sans-serif; color: black; font-weight: bold; font-size: 18px; text-align: center;
 }
 p {
-    background-color: #FF1A66; color: white; font-weight: bold; text-align: center; padding: 20px; border-radius: 10px; margin: 20px auto; width: 50%;
+    background-color: #FF1A66; color: white;padding: 20px; border-radius: 10px; margin: 20px auto; width: 50%;
 }
 img {
-    border: 4px solid #FF3399; padding: 6px; margin-bottom: 6px; background-color: #FF1A66;
-}
-a {
-    color: white; text-decoration: underline;
+    border: 4px solid white; padding: 6px; margin-bottom: 6px; background-color: #FF1A66;
 }
 ```
 
-# TikTok Engagement Analysis
+
+
+## TikTok Engagement Analysis
 
 ### This report investigates TikTok observation data collected from user interaction tracking. It focuses and analysis  how different content types influence user engagement, including content observed, likes, comments, time spent on videos and other various social media interactions.
 
-```{r}
-# Data and Code Setup
+```{r R Code and Variables Setup}
 library(tidyverse)
+library(magick)
 
 options(scipen = 999)
 
@@ -50,34 +47,79 @@ form_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPBYGP-4GkShen3Qbe
 logged_data <- read_csv(form_url)
 latest_data <- logged_data %>%
   rename(Content_type = `What type of content was observed?`, 
-         Likes = `How many likes did the content have? (Enter full number)`, 
-         Comments = `How many comments did the content have? (Enter full number)`,
+         Likes = `How many likes did the content have?`, 
+         Comments = `How many comments did the content have?`,
          Interaction = `How did you interact with the TikTok?`,
-         Time_spent = `Time (Seconds) spent on the content?`,
+         Time_spent = `How much time was spent on the content? (Seconds)`,
          Finished = `Did you watch the video until the end?`)
 
-
-media_vec <- c("Media / Entertainment (Film, TV, Animation, Art, Memes, Dance, etc)" = "Media / Ent")
+media_vec <- c("Media / Entertainment (Film, TV, Animation, Art, Memes, Dance, etc)" = "Media / Entertainment")
 
 latest_data$User_Engagement <- latest_data$Interaction != "Scrolled past (no interaction)"
 ```
+ 
+ 
+ 
+### Meme: TikTok Scrolling Behaviour
+
+```{r Meme: TikTok Scrolling Behaviour}
+# Meme Creation
+
+# ----- Image URL Links -----
+reject_url <- "https://i.pinimg.com/736x/25/ac/84/25ac84d26005bfaaf611f29b96993c62.jpg"
+accept_url <- "https://i.pinimg.com/736x/05/97/ab/0597abc9675b9f229e53e64ee82856ba.jpg"
+
+# ----- Load and prepare images -----
+reject_img <- image_read(reject_url) %>%
+  image_scale("500x600!") %>%
+  image_extent("500x600", gravity = "center")
+
+accept_img <- image_read(accept_url) %>%
+  image_scale("500x600!") %>%
+  image_extent("500x600", gravity = "center")
+
+# ----- Load and prepare text -----
+width = 500
+height = 600
+
+reject_text <- image_blank(width, height, color = "white") %>%
+  image_annotate(text = "Scrolling on \nTikTok", color = "black", size = 55, font = "Arial", gravity = "center")
+
+accept_text <- image_blank(width, height, color = "white") %>%
+  image_annotate(text = " Scrolling on Tiktok \n for Project 2", color = "black", size = 55, font = "Arial", gravity = "center")
+
+# ----- Format Border -----
+hori_line <- image_blank(width = 1030, height = 10, color = "black")
+vert_line <- image_blank(width = 10, height = 600, color = "black")
+
+reject_row <- image_append(c(vert_line, reject_text, vert_line, reject_img, vert_line))
+accept_row <- image_append(c(vert_line, accept_text, vert_line, accept_img, vert_line))
+
+project2_meme <- image_append(c(hori_line, reject_row, hori_line, accept_row, hori_line), stack=TRUE) %>%
+  image_scale(700)
+
+# ----- Write and Call -----
+image_write(project2_meme, "project2_meme.png")
+project2_meme
+```
 
 
-## Plot 1
 
-This section examines the distribution of different types of TikTok content. The number of Tiktoks for Sports content is `r sum(latest_data$Content_type == "Sports", na.rm = TRUE)`, compared to the total of `r length(latest_data$Content_type)`.
+## Plot 1: Distribution of TikTok Content Types
 
-```{r}
+This section examines the distribution of different types of TikTok content. The number of TikToks for Sports content is `r sum(latest_data$Content_type == "Sports", na.rm = TRUE)`, compared to the total of `r length(latest_data$Content_type)`.
+
+```{r Plot 1: Distribution of TikTok Content Types}
 ggplot(latest_data, aes(x = Content_type, fill = Content_type)) +
   geom_bar() +
-  labs(title = "Number of Tiktoks by Content Type",
+  labs(title = "Number of TikToks \nby Content Type",
        x = "Content Type",
-       y = "Count") +
+       y = "Number of TikToks") +
   guides(fill = "none") +
   theme_minimal() +
   coord_flip() +
   scale_x_discrete(labels = media_vec) +
-  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33)),
+  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33), hjust = 0.5),
         axis.title.x = element_text(size = 12, face = "bold", margin = margin(t = 33)),
         axis.title.y = element_text(size = 12, face = "bold", margin = margin(r = 33)),
         axis.text.y = element_text(size = 10, face  = "bold", color="black"),
@@ -87,11 +129,11 @@ ggplot(latest_data, aes(x = Content_type, fill = Content_type)) +
 
 
 
-## Plot 2
+## Plot 2: Time Spent by User Engagement
 
-This section analyses how much time users spend on Tiktoks where engagement occurred. Engagement includes interaction such as liking, commenting, reposting, etc. The average time spent on content with user engagement is `r round(mean(latest_data$Time_spent[latest_data$User_Engagement == TRUE], na.rm = TRUE))`, as opposed to the average of all content (Interacted and Non Interacted), which is `r round(mean(latest_data$Time_spent, na.rm = TRUE))` second(s).
+This section analyses how much time users spend on TikToks where engagement occurred. Engagement includes interaction such as liking, commenting, reposting, etc. The average time spent on content with user engagement is `r round(mean(latest_data$Time_spent[latest_data$User_Engagement == TRUE], na.rm = TRUE))`, as opposed to the average of all content (Interacted and Non Interacted), which is `r round(mean(latest_data$Time_spent, na.rm = TRUE))` second(s).
 
-```{r}
+```{r Plot 2: Time Spent by User Engagement}
 ggplot(latest_data, aes(x = User_Engagement, y = Time_spent, fill = User_Engagement)) +
   geom_bar(stat = "summary", fun = "mean") + 
   scale_fill_manual(values = c("FALSE" = "red", "TRUE" = "green")) +
@@ -101,7 +143,7 @@ ggplot(latest_data, aes(x = User_Engagement, y = Time_spent, fill = User_Engagem
        y = "Average Time (Seconds)") +
   guides(fill = "none") +
   theme_minimal() +
-  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33)),
+  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33), hjust = 0.5),
         axis.title.x = element_text(size = 12, face = "bold", margin = margin(t = 33)),
         axis.title.y = element_text(size = 12, face = "bold", margin = margin(r = 33)),
         axis.text.y = element_text(size = 10, face  = "bold", color="black"),
@@ -111,21 +153,21 @@ ggplot(latest_data, aes(x = User_Engagement, y = Time_spent, fill = User_Engagem
 
 
 
-## Plot 3
+## Plot 3: Average Comments by Content Type
 
 This section investigates the mean numbers comments on Tiktok by content type. Media/Ent content tends to recieve an average of `r round(mean(latest_data$Comments[latest_data$Content_type == "Media / Entertainment (Film, TV, Animation, Art, Memes, Dance, etc)"], na.rm = TRUE))` comments, in contrast to the `r round(mean(latest_data$Comments, na.rm = TRUE))` average of all content.
 
-```{r}
+```{r Plot 3: Average Comments by Content Type}
 ggplot(latest_data, aes(x = Content_type, y = Comments, fill = Content_type)) +
   geom_bar(stat = "summary", fun = "mean") +
-  labs(title = "Average number of Comments by Content Type",
+  labs(title = "Average Number of \nComments by Content Type",
        x = "Content Type",
-       y = "Average Comments") +
+       y = "Average Number of Comments") +
   guides(fill = "none") +
   theme_minimal() +
   scale_x_discrete(labels = media_vec) +
   coord_flip() +
-  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33)),
+  theme(plot.title = element_text(size = 16, face = "bold", margin = margin(b = 33), hjust = 0.5),
         axis.title.x = element_text(size = 12, face = "bold", margin = margin(t = 33)),
         axis.title.y = element_text(size = 12, face = "bold", margin = margin(r = 33)),
         axis.text.y = element_text(size = 10, face  = "bold", color="black"),
