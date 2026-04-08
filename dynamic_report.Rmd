@@ -155,7 +155,7 @@ ggplot(latest_data, aes(x = User_Engagement, y = Time_spent, fill = User_Engagem
 
 ## Plot 3: Average Comments by Content Type
 
-This section investigates the mean numbers comments on Tiktok by content type. Media/Ent content tends to recieve an average of `r round(mean(latest_data$Comments[latest_data$Content_type == "Media / Entertainment (Film, TV, Animation, Art, Memes, Dance, etc)"], na.rm = TRUE))` comments, in contrast to the `r round(mean(latest_data$Comments, na.rm = TRUE))` average of all content.
+This section investigates the mean numbers comments on Tiktok by content type. Media / Entertainment content tends to recieve an average of `r round(mean(latest_data$Comments[latest_data$Content_type == "Media / Entertainment (Film, TV, Animation, Art, Memes, Dance, etc)"], na.rm = TRUE))` comments, in contrast to the `r round(mean(latest_data$Comments, na.rm = TRUE))` average of all content.
 
 ```{r Plot 3: Average Comments by Content Type}
 ggplot(latest_data, aes(x = Content_type, y = Comments, fill = Content_type)) +
